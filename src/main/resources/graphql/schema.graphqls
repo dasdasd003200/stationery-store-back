@@ -1,0 +1,28 @@
+# Root schema. Each module contributes its operations in its own file
+# (graphql/<module>.graphqls) using `extend type Query` / `extend type Mutation`.
+
+scalar DateTime
+
+type Query {
+  "Liveness check for clients."
+  ping: String!
+}
+
+type Mutation
+
+# ─── Pagination (shared by every module) ───────────────────────────
+# Each module declares its own page type, e.g.
+#   type ProductPage { items: [Product!]!  pageInfo: PageInfo! }
+
+"0-based page request. Defaults: page 0, size 10 (max 100)."
+input PageInput {
+  page: Int = 0
+  size: Int = 10
+}
+
+type PageInfo {
+  page: Int!
+  size: Int!
+  totalItems: Int!
+  totalPages: Int!
+}

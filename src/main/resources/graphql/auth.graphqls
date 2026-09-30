@@ -1,0 +1,91 @@
+# ─── Auth & users module ────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+type User {
+  id: ID!
+  username: String!
+  fullName: String!
+  email: String
+  role: Role!
+  "Permission codes granted by the role, e.g. users:read"
+  permissions: [String!]!
+  active: Boolean!
+  lastLoginAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AuthPayload {
+  accessToken: String!
+  expiresAt: DateTime!
+  user: User!
+}
+
+type UserPage {
+  items: [User!]!
+  pageInfo: PageInfo!
+}
+
+"All fields optional; omitted fields don't filter."
+input UserFilter {
+  "Case-insensitive partial match on username, full name or email"
+  search: String
+  role: Role
+  active: Boolean
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+input CreateUserInput {
+  username: String!
+  fullName: String!
+  email: String!
+  password: String!
+  role: Role!
+}
+
+input UpdateUserInput {
+  fullName: String!
+  email: String!
+  role: Role!
+}
+
+input ResetPasswordInput {
+  newPassword: String!
+}
+
+extend type Query {
+  "The authenticated user."
+  me: User!
+  "Requires users:read. Sorted by full name."
+  users(filter: UserFilter, page: PageInput): UserPage!
+  "Requires users:read"
+  user(id: ID!): User
+}
+
+extend type Mutation {
+  login(input: LoginInput!): AuthPayload!
+  changeMyPassword(input: ChangePasswordInput!): Boolean!
+
+  "Requires users:write"
+  createUser(input: CreateUserInput!): User!
+  "Requires users:write"
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+  "Requires users:write"
+  setUserActive(id: ID!, active: Boolean!): User!
+  "Requires users:write"
+  resetUserPassword(id: ID!, input: ResetPasswordInput!): Boolean!
+}
